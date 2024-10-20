@@ -144,8 +144,8 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     }
   }
   
-  // Periodically fetch data from the server to simulate updates
-  async function fetchServerQuotes() {
+  // Fetch quotes from the server to simulate updates
+  async function fetchQuotesFromServer() {
     try {
       const response = await fetch(API_URL);
       const serverQuotes = await response.json();
@@ -157,6 +157,7 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     }
   }
   
+  // Sync local quotes with server quotes
   function syncQuotesWithServer(serverQuotes) {
     serverQuotes.forEach(serverQuote => {
       // Check if the quote already exists in local storage
@@ -173,6 +174,7 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     displaySyncNotification(serverQuotes.length);
   }
   
+  // Display a sync notification
   function displaySyncNotification(newQuotesCount) {
     const notification = document.createElement('div');
     notification.className = 'sync-notification';
@@ -196,6 +198,6 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   categoryFilter.addEventListener('change', filterQuotes);
   importFileInput.addEventListener('change', importFromJsonFile);
   
-  // Periodically fetch server quotes
-  setInterval(fetchServerQuotes, 10000); // Fetch new quotes every 10 seconds
+  // Periodically fetch quotes from the server
+  setInterval(fetchQuotesFromServer, 10000); // Fetch new quotes every 10 seconds
   
