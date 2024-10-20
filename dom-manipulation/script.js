@@ -72,6 +72,37 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     }
   }
   
+  // Function to sync quotes with the server
+  async function syncQuotes() {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch quotes from server');
+      }
+  
+      const serverQuotes = await response.json();
+      
+      // Assuming serverQuotes is an array of quote objects with a unique id or similar
+      const localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+  
+      // Simple conflict resolution: server data takes precedence
+      const mergedQuotes = serverQuotes.map(serverQuote => {
+        const existingQuote = localQuotes.find(localQuote => localQuote.text === serverQuote.body); // Compare by quote text or id
+        return existingQuote || { text: serverQuote.body, category: 'Uncategorized' }; // Default category if not found
+      });
+  
+      // Update local storage with merged quotes
+      localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
+      
+      // Refresh the displayed quotes
+      quotes = mergedQuotes; // Update the in-memory quotes array
+      filterQuotes(); // Re-filter to update display
+      console.log('Quotes synchronized successfully');
+    } catch (error) {
+      console.error('Error syncing quotes:', error);
+    }
+  }
+  
   // Add a new quote and update the category dropdown if needed
   function createAddQuoteForm() {
     const formContainer = document.createElement('div');
@@ -158,14 +189,15 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   // Initialize the app
   populateCategories();
   createAddQuoteForm();
-  filterQuotes(); // Apply filter on load
+  filterQuotes();
   restoreLastViewedQuote();
   
-  // Event listeners
-  document.getElementById('showRandomQuote').addEventListener('click', showRandomQuote);
+  // Event listener for category change
   categoryFilter.addEventListener('change', filterQuotes);
+  
+  // Event listener for file input
   importFileInput.addEventListener('change', importFromJsonFile);
   
-  // Periodically fetch quotes from the server
-  setInterval(fetchQuotesFromServer, 10000); // Fetch new quotes every 10 seconds
+  // Periodically call syncQuotes every 30 seconds
+  setInterval(syncQuotes, 30000);
   
