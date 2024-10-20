@@ -23,6 +23,26 @@ async function fetchQuotesFromServer() {
   }
 }
 
+// Function to post a new quote to the server
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST', // Specify the method
+      headers: {
+        'Content-Type': 'application/json' // Set the content type
+      },
+      body: JSON.stringify(quote) // Convert the quote to JSON
+    });
+    if (!response.ok) {
+      throw new Error('Failed to post quote to server');
+    }
+    const serverResponse = await response.json();
+    console.log('Quote posted successfully:', serverResponse);
+  } catch (error) {
+    console.error('Error posting quote:', error);
+  }
+}
+
 // Function to sync quotes with the server
 async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
@@ -53,14 +73,16 @@ function showRandomQuote() {
 }
 
 // Function to add a new quote
-function addQuote() {
+async function addQuote() {
   const newQuoteText = document.getElementById('newQuoteText').value;
   const newQuoteCategory = document.getElementById('newQuoteCategory').value;
 
   if (newQuoteText && newQuoteCategory) {
     const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    
     quotes.push(newQuote);
     saveQuotes(); // Save the updated quotes to local storage
+    await postQuoteToServer(newQuote); // Post the new quote to the server
     showRandomQuote(); // Display a new random quote
     populateCategories(); // Update category dropdown
     document.getElementById('newQuoteText').value = ''; // Clear input field
