@@ -13,14 +13,14 @@ const quotes = [
   const addQuoteButton = document.getElementById('addQuoteButton');
   
   // Function to display a random quote
-  function displayRandomQuote() {
+  function showRandomQuote() {
     const randomIndex = Math.floor(Math.random() * quotes.length);
     const randomQuote = quotes[randomIndex];
     quoteDisplay.innerHTML = `"${randomQuote.text}" - <em>${randomQuote.category}</em>`;
   }
   
   // Event listener for showing a new random quote
-  showQuoteButton.addEventListener('click', displayRandomQuote);
+  showQuoteButton.addEventListener('click', showRandomQuote);
   
   // Function to add a new quote to the array and update the DOM
   function addQuote() {
