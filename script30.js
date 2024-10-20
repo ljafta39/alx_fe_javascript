@@ -16,7 +16,7 @@ async function fetchQuotesFromServer() {
     }
     const serverQuotes = await response.json();
     // Return only the body as quotes, or adjust based on your API structure
-    return serverQuotes.map(quote => ({ text: quote.body, category: 'Uncategorized' }));
+    return serverQuotes.map(quote => ({ text: quote.body, category: 'Uncategorized' })); 
   } catch (error) {
     console.error('Error fetching quotes:', error);
     return []; // Return an empty array on error
@@ -61,9 +61,7 @@ async function syncQuotes() {
   // Refresh the displayed quotes
   quotes = mergedQuotes; // Update the in-memory quotes array
   filterQuotes(); // Re-filter to update display
-
-  // Notify user about the sync
-  notifyUser('Quotes synced with server!'); // Call the notification function
+  console.log('Quotes synchronized successfully');
 }
 
 // Function to show a random quote
@@ -130,19 +128,6 @@ function filterQuotes() {
   } else {
     quoteDisplay.innerHTML = `<p>No quotes available for this category.</p>`;
   }
-}
-
-// Function to notify the user
-function notifyUser(message) {
-  const notification = document.createElement('div');
-  notification.className = 'notification'; // You can style this class in CSS
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  // Automatically remove the notification after 3 seconds
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
 }
 
 // Event listener for the "Show New Quote" button
