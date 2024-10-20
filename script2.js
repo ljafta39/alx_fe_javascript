@@ -5,7 +5,6 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", category: "Success" }
   ];
   
-  const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Mock API for simulation
   const quoteDisplay = document.getElementById('quoteDisplay');
   const categoryFilter = document.getElementById('categoryFilter');
   const importFileInput = document.getElementById('importFile');
@@ -144,47 +143,6 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     }
   }
   
-  // Periodically fetch data from the server to simulate updates
-  async function fetchServerQuotes() {
-    try {
-      const response = await fetch(API_URL);
-      const serverQuotes = await response.json();
-  
-      // Update local storage with server quotes
-      syncQuotesWithServer(serverQuotes);
-    } catch (error) {
-      console.error('Error fetching server quotes:', error);
-    }
-  }
-  
-  function syncQuotesWithServer(serverQuotes) {
-    serverQuotes.forEach(serverQuote => {
-      // Check if the quote already exists in local storage
-      const exists = quotes.find(quote => quote.text === serverQuote.body);
-      
-      if (!exists) {
-        // If the quote doesn't exist, add it
-        quotes.push({ text: serverQuote.body, category: 'Fetched' });
-        saveQuotes();
-      }
-    });
-  
-    // Display a notification for updated quotes
-    displaySyncNotification(serverQuotes.length);
-  }
-  
-  function displaySyncNotification(newQuotesCount) {
-    const notification = document.createElement('div');
-    notification.className = 'sync-notification';
-    notification.innerText = `${newQuotesCount} new quotes fetched from the server!`;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.remove();
-    }, 5000); // Remove notification after 5 seconds
-  }
-  
   // Initialize the app
   populateCategories();
   createAddQuoteForm();
@@ -192,10 +150,6 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   restoreLastViewedQuote();
   
   // Event listeners
-  document.getElementById('showRandomQuote').addEventListener('click', showRandomQuote);
-  categoryFilter.addEventListener('change', filterQuotes);
+  document.getElementById('showQuoteButton').addEventListener('click', showRandomQuote);
   importFileInput.addEventListener('change', importFromJsonFile);
-  
-  // Periodically fetch server quotes
-  setInterval(fetchServerQuotes, 10000); // Fetch new quotes every 10 seconds
   
