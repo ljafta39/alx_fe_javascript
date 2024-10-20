@@ -50,19 +50,26 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     ).join('');
   }
   
-  // Display a random quote from the current filter
-  function showRandomQuote() {
-    const selectedCategory = categoryFilter.value;
-    const filteredQuotes = selectedCategory === 'all'
-      ? quotes
-      : quotes.filter(quote => quote.category === selectedCategory);
+  // Function to post a new quote to the server
+  async function postQuoteToServer(newQuote) {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ body: newQuote.text }) // Adjust the payload as needed
+      });
   
-    const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-    const randomQuote = filteredQuotes[randomIndex];
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
   
-    sessionStorage.setItem('lastViewedQuote', JSON.stringify(randomQuote)); // Save to session storage
-  
-    quoteDisplay.innerHTML = `"${randomQuote.text}" - <em>${randomQuote.category}</em>`;
+      const postedQuote = await response.json();
+      console.log('Quote posted successfully:', postedQuote);
+    } catch (error) {
+      console.error('Error posting quote:', error);
+    }
   }
   
   // Add a new quote and update the category dropdown if needed
@@ -87,7 +94,8 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     formContainer.appendChild(addQuoteButton);
     document.body.appendChild(formContainer);
   
-    addQuoteButton.addEventListener('click', () => {
+    // Update the add quote button event listener to post the new quote to the server
+    addQuoteButton.addEventListener('click', async () => {
       const quoteText = newQuoteText.value.trim();
       const quoteCategory = newQuoteCategory.value.trim();
   
@@ -96,6 +104,9 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
         quotes.push(newQuote);
         saveQuotes();
         populateCategories(); // Update categories if new ones are added
+  
+        // Post the new quote to the server
+        await postQuoteToServer(newQuote);
   
         newQuoteText.value = '';
         newQuoteCategory.value = '';
@@ -142,49 +153,6 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     if (lastViewedQuote) {
       quoteDisplay.innerHTML = `"${lastViewedQuote.text}" - <em>${lastViewedQuote.category}</em>`;
     }
-  }
-  
-  // Fetch quotes from the server to simulate updates
-  async function fetchQuotesFromServer() {
-    try {
-      const response = await fetch(API_URL);
-      const serverQuotes = await response.json();
-  
-      // Update local storage with server quotes
-      syncQuotesWithServer(serverQuotes);
-    } catch (error) {
-      console.error('Error fetching server quotes:', error);
-    }
-  }
-  
-  // Sync local quotes with server quotes
-  function syncQuotesWithServer(serverQuotes) {
-    serverQuotes.forEach(serverQuote => {
-      // Check if the quote already exists in local storage
-      const exists = quotes.find(quote => quote.text === serverQuote.body);
-      
-      if (!exists) {
-        // If the quote doesn't exist, add it
-        quotes.push({ text: serverQuote.body, category: 'Fetched' });
-        saveQuotes();
-      }
-    });
-  
-    // Display a notification for updated quotes
-    displaySyncNotification(serverQuotes.length);
-  }
-  
-  // Display a sync notification
-  function displaySyncNotification(newQuotesCount) {
-    const notification = document.createElement('div');
-    notification.className = 'sync-notification';
-    notification.innerText = `${newQuotesCount} new quotes fetched from the server!`;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.remove();
-    }, 5000); // Remove notification after 5 seconds
   }
   
   // Initialize the app
